@@ -32,7 +32,6 @@ The system is designed to evolve easily: modules are decoupled, testable, and re
 ```text
 Orderbook/
 ├── bot_orderbook_main.py               # Entry point
-├── EXEMPLE.md                          # README style reference
 ├── README.md                           # Project documentation
 ├── bot/
 │   ├── __init__.py
