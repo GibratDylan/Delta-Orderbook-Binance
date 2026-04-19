@@ -18,7 +18,7 @@ class ReconnectingWebSocket:
         *,
         name: str,
         url: str,
-        subscribe_payload: dict,
+        subscribe_payload: Optional[dict],
         on_message: MessageHandler,
         logger,
         recv_timeout_seconds: float,
@@ -47,8 +47,9 @@ class ReconnectingWebSocket:
                 self.logger.info("connecting stream=%s url=%s", self.name, self.url)
                 async with connect(self.url, compression=None) as ws:
                     attempt = 0
-                    await ws.send(json.dumps(self.subscribe_payload))
-                    self.logger.info("subscribed stream=%s payload=%s", self.name, self.subscribe_payload)
+                    if self.subscribe_payload:
+                        await ws.send(json.dumps(self.subscribe_payload))
+                        self.logger.info("subscribed stream=%s payload=%s", self.name, self.subscribe_payload)
 
                     while not stop_event.is_set():
                         raw = await asyncio.wait_for(ws.recv(), timeout=self.recv_timeout_seconds)

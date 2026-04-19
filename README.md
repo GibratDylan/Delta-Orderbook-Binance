@@ -27,11 +27,18 @@ The engine is built around:
 
 The system is designed to evolve easily: modules are decoupled, testable, and replaceable without breaking the full pipeline.
 
+## Preview
+
+![Bot Preview](assets/Screenshot%20From%202026-04-19%2015-15-32.png)
+
 ## Project Structure
 
 ```text
 Orderbook/
 ├── bot_orderbook_main.py               # Entry point
+├── Dockerfile                          # Container image definition
+├── docker-compose.yml                  # Local container orchestration
+├── .dockerignore                       # Excludes files from build context
 ├── README.md                           # Project documentation
 ├── bot/
 │   ├── __init__.py
@@ -66,7 +73,7 @@ Orderbook/
 
 2. Install minimal dependencies:
    ```bash
-   pip install websockets python-binance
+   pip install -r requirements.txt
    ```
 
 3. Configure environment variables:
@@ -77,6 +84,62 @@ Orderbook/
 4. Start in safe simulation mode:
    ```bash
    DRY_RUN=true python bot_orderbook_main.py
+   ```
+
+### Docker
+
+1. Create your runtime env file:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Build the image:
+   ```bash
+    make build
+   ```
+
+3. Run the bot in container:
+   ```bash
+    make up
+   ```
+
+4. Follow logs:
+   ```bash
+   docker compose logs -f bot
+   ```
+
+5. Stop the container:
+   ```bash
+    make down
+    ```
+
+### Makefile commands
+
+The project includes a Makefile to manage Docker quickly.
+
+- Build image:
+   ```bash
+   make build
+   ```
+- Start container in background:
+   ```bash
+   make up
+   ```
+- Stop and remove running containers:
+   ```bash
+   make down
+   ```
+- Stop containers and remove local images/volumes/orphans:
+   ```bash
+   make clean
+   ```
+- Run default full workflow (build + up):
+   ```bash
+   make all
+   ```
+- Recreate everything (clean + all):
+   ```bash
+   make re
    ```
 
 ### Usage

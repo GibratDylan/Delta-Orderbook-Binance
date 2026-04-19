@@ -10,7 +10,7 @@ def setup_logging(level: str = "INFO") -> logging.Logger:
     logger.setLevel(level)
     handler = logging.StreamHandler()
     formatter = logging.Formatter(
-        "%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+        "%(asctime)s.%(msecs)03d | %(levelname)-7s | %(name)s | %(message)s",
         "%Y-%m-%d %H:%M:%S",
     )
     handler.setFormatter(formatter)

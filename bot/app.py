@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from contextlib import suppress
+from time import monotonic
 from typing import List
 
 from .analytics import SignalEngine
@@ -109,6 +110,9 @@ class OrderbookTradingApp:
             "btcusdt@depth20@100ms",
             "btcfdusd@depth20@100ms",
         ]
+        decision_log_heartbeat_seconds = 5.0
+        last_logged_signature = None
+        last_logged_at = 0.0
 
         while not self.stop_event.is_set():
             books = []
@@ -118,14 +122,25 @@ class OrderbookTradingApp:
                     books.append(book)
 
             decision = self.signal_engine.evaluate(books)
-            self.logger.info(
-                "decision open=%s reason=%s delta=%s spread_pct=%s pos=%s",
+            signature = (
                 decision.should_open,
                 decision.reason,
-                decision.delta,
-                decision.spread_pct,
                 self.current_positions,
             )
+            now = monotonic()
+            should_log = signature != last_logged_signature or (now - last_logged_at) >= decision_log_heartbeat_seconds
+
+            if should_log:
+                self.logger.info(
+                    "decision open=%s | reason=%s | delta=%s | spread_pct=%s | pos=%s",
+                    decision.should_open,
+                    decision.reason,
+                    decision.delta,
+                    decision.spread_pct,
+                    self.current_positions,
+                )
+                last_logged_signature = signature
+                last_logged_at = now
 
             if (
                 decision.should_open
@@ -167,7 +182,7 @@ class OrderbookTradingApp:
             ReconnectingWebSocket(
                 name="binance",
                 url=streams.binance_stream_url,
-                subscribe_payload={"method": "SUBSCRIBE", "params": [], "id": 1},
+                subscribe_payload=None,
                 on_message=self._binance_handler,
                 logger=self.logger,
                 recv_timeout_seconds=streams.recv_timeout_seconds,
